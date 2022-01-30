@@ -36,7 +36,7 @@ c_logger.setLevel(logging.DEBUG)
 
 def load_config(filepath='config.yaml'):
     """
-    Fonction qui permet d'importer les paramètres
+    Function wich import parameter
     """
     try:
         with open(filepath, 'r', encoding='utf8') as stream:
@@ -54,3 +54,14 @@ def load_config(filepath='config.yaml'):
         raise Exception('Il manque des paramètres olbigatoire dans {}'.format(filepath))
         age_of_logger.exception('Il manque des paramètres olbigatoire dans %s', filepath)
     return conf
+
+def camel_case_2snake_case(camel_case):
+    """
+    Transform CamelCase to snake_case
+    """
+    snake_case = ""
+    for i,l in enumerate(camel_case):
+        if l.isupper() and i != 0:
+            snake_case+="_"
+        snake_case+=l.lower()
+    return snake_case
