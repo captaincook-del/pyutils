@@ -5,10 +5,12 @@ __author__ = "captaincook-del"
 __version__ = "beta"
 __status__ = "Production"
 
+# pylint: disable=missing-module-docstring, wrong-import-position, import-error
+# pylint: disable=undefined-variable, unused-variable, unused-import
+
 """
 Toolkit
 """
-
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from yaml import safe_load
@@ -47,11 +49,9 @@ def load_config(filepath='config.yaml'):
     except FileNotFoundError:
         age_of_logger.exception('Le fichier %s est introuvable',filepath)
         return None
-    # provoque une attribut error si le fichier existe 
-    # mais qu'il est vide
     if REQUIRED_GLOBALS-frozenset(list(conf.keys())):
         print("ERREUR : impossible de trouver le fichier %s", filepath)
-        raise Exception('Il manque des paramètres olbigatoire dans {}'.format(filepath))
+        raise Exception('Il manque des paramètres olbigatoire dans %s', filepath)
         age_of_logger.exception('Il manque des paramètres olbigatoire dans %s', filepath)
     return conf
 
@@ -60,8 +60,25 @@ def camel_case_2snake_case(camel_case):
     Transform CamelCase to snake_case
     """
     snake_case = ""
-    for i,l in enumerate(camel_case):
-        if l.isupper() and i != 0:
+    for ind,letter in enumerate(camel_case):
+        if letter.isupper() and ind != 0:
             snake_case+="_"
-        snake_case+=l.lower()
+        snake_case+=letter.lower()
     return snake_case
+
+def snake_case_2camel_case(snake_case):
+    """
+    Transform snake_case to CamelCase
+    """
+    camel_case = ""
+    is_upper = False
+
+    for ind,letter in enumerate(snake_case):
+        if not letter.isalpha():
+            is_upper = True
+        elif is_upper:
+            camel_case+= letter.upper()
+            is_upper = False
+        else:
+            camel_case+=letter
+    return camel_case
