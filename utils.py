@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "captaincook-del"
-__version__ = "beta"
+__version__ = "1.0"
 __status__ = "Production"
 
 # pylint: disable=missing-module-docstring, wrong-import-position, import-error
@@ -12,6 +12,9 @@ __status__ = "Production"
 Toolkit
 """
 import logging
+import binascii
+from base64 import b64decode
+from base64 import b64encode
 from logging.handlers import TimedRotatingFileHandler
 from yaml import safe_load
 from yaml import YAMLError
@@ -82,3 +85,26 @@ def snake_case_2camel_case(snake_case):
         else:
             camel_case+=letter
     return camel_case
+
+def isb64(data):
+    """
+    Test is the data is in base 64
+    """
+    test = False
+    try:
+        test = bytes.decode(b64encode(b64decode(data))) == data.decode("utf-8")
+    except binascii.Error:
+        pass
+    return test
+
+def b64dec(data):
+    """
+    Dencode the data in base64
+    """
+    return b64decode(data).decode("utf-8")
+
+def encode64(data):
+    """
+    Encode the string data in base64
+    """
+    return b64encode(data.encode('ascii'))
