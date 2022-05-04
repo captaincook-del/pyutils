@@ -5,14 +5,13 @@ __author__ = "captaincook-del"
 __version__ = "1.O"
 __status__ = "Production"
 
-"""
-Exemple fo using utils.py
-"""
+""" Exemple fo using utils.py """
 
 from utils import *
 
 if __name__ == "__main__":
     c_logger.info("Exemple start")
+    print(YELLOW + "A little test of color prompt" + OFF)
     conf = load_config()
     print(conf)
     print("HelloWorld to : "+camel_case_2snake_case("HelloWorld"))
