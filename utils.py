@@ -3,7 +3,6 @@
 
 __author__ = "captaincook-del"
 __version__ = "1.0"
-__status__ = "Production"
 
 # pylint: disable=missing-module-docstring, wrong-import-position, import-error
 # pylint: disable=undefined-variable, unused-variable, unused-import
@@ -11,17 +10,18 @@ __status__ = "Production"
 """ Toolkit """
 import logging
 import binascii
-from enum import Enum
-from base64 import b64decode
-from base64 import b64encode
+from base64 import b64decode, b64encode
+from os import walk, getcwd
+from os.path import join, isdir
 from logging.handlers import TimedRotatingFileHandler
+
 from yaml import safe_load
 from yaml import YAMLError
 
 NAME = 'utils'
 REQUIRED_GLOBALS = frozenset(['name'])
 
-""" Color variables """
+""" Color  """
 # Reset
 OFF='\033[0m'       # Text Reset
 
@@ -67,10 +67,10 @@ ON_WHITE='\033[47m'       # WHITE
 
 logger_formatter = logging.Formatter(
     '%(asctime)s [%(name)s] : %(levelname)s %(message)s',
-    datefmt='%B. %d %H:%M:{0}'
+    datefmt='%B. %d %H:%M:'
 )
 c_logger = logging.getLogger(NAME)
-handler_logger = handler_debug = logging.handlers.TimedRotatingFileHandler(
+handler_logger = logging.handlers.TimedRotatingFileHandler(
     "./"+NAME+".log",
     when="D",
     interval=1,
@@ -89,13 +89,13 @@ def load_config(filepath='config.yaml'):
             try:
                 conf = safe_load(stream)
             except YAMLError:
-                c_logger.exception('Erreur dans la lecture du fichier {0}'.format(filepath))
+                c_logger.exception('Error in reading the file {0}'.format(filepath))
     except FileNotFoundError:
-        c_logger.exception('Le fichier {0} est introuvable'.format(filepath))
+        c_logger.exception('File not found: {0}'.format(filepath))
         return None
     if REQUIRED_GLOBALS-frozenset(list(conf.keys())):
-        c_logger.exception('Il manque des paramètres olbigatoire dans {0}'.format(filepath))
-        raise Exception('Il manque des paramètres olbigatoire dans {0}'.format(filepath))
+        c_logger.exception('There are missing olbigatory parameters in{0}'.format(filepath))
+        raise Exception('There are missing olbigatory parameters in{0}'.format(filepath))
 
     return conf
 
@@ -133,9 +133,30 @@ def isb64(data):
     return test
 
 def b64dec(data):
-    """ Dencode the data in base64 """
+    """ Decode the data in base64 """
     return b64decode(data).decode("utf-8")
 
 def encode64(data):
     """ Encode the string data in base64 """
     return b64encode(data.encode('ascii'))
+
+def tree_path(path=getcwd(), add_hidden=False):
+    """ construct a tree of the path with all files and subdirectories """
+    # if path exist but is empty
+    if not path:
+        path = getcwd()
+
+    if not isdir(path):
+        return ["Path is not a directory"]
+
+    file_list = []
+    for root, dirs, files in walk(path):
+        for file in files:
+            # print(f"file {join(root, file)}")
+            if add_hidden or not is_hidden(join(root, file)):
+                file_list.append(join(root, file))
+    return file_list
+
+def is_hidden(filename):
+    """ Check if the file is hidden and return True if it is """
+    return any([file for file in filename.split("/") if file.startswith(".") or file.startswith("__")])
