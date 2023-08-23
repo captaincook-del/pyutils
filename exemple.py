@@ -9,9 +9,12 @@ __version__ = "1.O"
 from json import dumps
 
 from utils import *
+from logger import LOGGER
 
 if __name__ == "__main__":
-    c_logger.info("Exemple start")
+    LOGGER.set_debug()
+    LOGGER.info("Exemple start")
+
     print(YELLOW + "A little test of color prompt" + OFF)
     conf = load_config()
     print("configuration loaded in yml: ", dumps(conf, indent=4))
@@ -27,5 +30,5 @@ if __name__ == "__main__":
     print()
     paths = tree_path()
     print("list of current tree path: ", dumps(paths, indent=4))
-    c_logger.debug(conf)
-    c_logger.info("Exemple end")
+    LOGGER.debug(conf)
+    LOGGER.info("Exemple end")

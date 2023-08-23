@@ -18,6 +18,8 @@ from logging.handlers import TimedRotatingFileHandler
 from yaml import safe_load
 from yaml import YAMLError
 
+from logger import LOGGER
+
 NAME = 'utils'
 REQUIRED_GLOBALS = frozenset(['name'])
 
@@ -65,22 +67,6 @@ ON_PURPLE='\033[45m'      # PURPLE
 ON_CYAN='\033[46m'        # CYAN
 ON_WHITE='\033[47m'       # WHITE
 
-logger_formatter = logging.Formatter(
-    '%(asctime)s [%(name)s] : %(levelname)s %(message)s',
-    datefmt='%B. %d %H:%M:'
-)
-c_logger = logging.getLogger(NAME)
-handler_logger = logging.handlers.TimedRotatingFileHandler(
-    "./"+NAME+".log",
-    when="D",
-    interval=1,
-    encoding="utf-8",
-    backupCount=7
-)
-
-handler_logger.setFormatter(logger_formatter)
-c_logger.addHandler(handler_logger)
-c_logger.setLevel(logging.DEBUG)
 
 def load_config(filepath='config.yaml'):
     """ Function wich import parameter """
@@ -89,12 +75,12 @@ def load_config(filepath='config.yaml'):
             try:
                 conf = safe_load(stream)
             except YAMLError:
-                c_logger.exception('Error in reading the file {0}'.format(filepath))
+                LOGGER.exception('Error in reading the file {0}'.format(filepath))
     except FileNotFoundError:
-        c_logger.exception('File not found: {0}'.format(filepath))
+        LOGGER.exception('File not found: {0}'.format(filepath))
         return None
     if REQUIRED_GLOBALS-frozenset(list(conf.keys())):
-        c_logger.exception('There are missing olbigatory parameters in{0}'.format(filepath))
+        LOGGER.exception('There are missing olbigatory parameters in{0}'.format(filepath))
         raise Exception('There are missing olbigatory parameters in{0}'.format(filepath))
 
     return conf
@@ -174,3 +160,36 @@ def tree_path(path=getcwd(), add_hidden=False):
 def is_hidden(filename):
     """ Check if the file is hidden and return True if it is """
     return any([file for file in filename.split("/") if file.startswith(".") or file.startswith("__")])
+
+def detect_language(text):
+    """ function to detect the language of a text based on the Index of Coincidence """
+    def calculate_ioc(text, precision=3, only_alpha=True):
+        text = text.upper().replace(" ", "")
+        if only_alpha:
+            text = "".join([letter for letter in text if letter.isalpha()])
+        total_chars = len(text)
+
+        # Calculate the frequency of each letter in the alphabet
+        letter_counts = {chr(i): text.count(chr(i)) for i in range(ord('A'), ord('Z') + 1)}
+
+        # Calculate the Index of Coincidence
+        ioc_numerator = sum(count * (count - 1) for count in letter_counts.values())
+        ioc_denominator = total_chars * (total_chars - 1)
+        index_of_coincidence = ioc_numerator / ioc_denominator
+
+        return round(index_of_coincidence, precision)
+    
+    def calcul_lang(ioc, delta_ma=0.025):
+        IOC_LANG = {
+            "fr": 0.078,
+            "en": 0.067,
+        }
+
+        for lang, ioc_lang in IOC_LANG.items():
+            if ioc_lang - delta_ma < ioc < ioc_lang + delta_ma:
+                return lang
+        
+        return "Unknown"
+    
+    ioc = calculate_ioc(text)
+    return calcul_lang(ioc)
