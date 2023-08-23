@@ -140,6 +140,20 @@ def encode64(data):
     """ Encode the string data in base64 """
     return b64encode(data.encode('ascii'))
 
+def read_file(file_name):
+    """ Read a file """
+    with open(file_name, 'r') as file:
+        return file.read()
+    
+def write_file(file_name, content):
+    """ Write a file """
+    with open(file_name, 'w') as file:
+        file.write(content)
+
+def get_name(file_path):
+    """ Get the name of a file """
+    return file_path.split('/')[-1]
+
 def tree_path(path=getcwd(), add_hidden=False):
     """ construct a tree of the path with all files and subdirectories """
     # if path exist but is empty
